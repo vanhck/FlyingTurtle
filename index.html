@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Icon Sprites with WebGL</title>
+    <link rel="stylesheet" href="https://openlayers.org/en/v4.2.0/css/ol.css" type="text/css">
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+    <script src="https://openlayers.org/en/v4.2.0/build/ol-debug.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div id="map" class="map"></div>
+    <div id="info">&nbsp;</div>
+    <div class="button-bar">
+        <button class="startbtn">start</button>
+        <button class="stopbtn">stop</button>
+        <button class="createuser">create user</button>
+        <button class="package">trigger delivery</button>
+    </div>
+    <script>
+    var host = "http://52.58.76.156:8080/"
+    // var host = "http://localhost:8080/"
+
+    var kaCenter = [8.425698, 49.011576]
+
+    var stationPos = [8.425789, 49.010344]
+
+    var userHouses = [
+        [8.426613, 49.012326],
+        [8.426661, 49.011200],
+        [8.426865, 49.011221],
+        [8.427648, 49.011320],
+        [8.426339, 49.011813],
+        [8.424499, 49.011961],
+        [8.423941, 49.011757],
+        [8.423313, 49.011655],
+        [8.423394, 49.010866],
+        [8.425156, 49.010267],
+        [8.424748, 49.010267],
+        [8.428106, 49.010612],
+        [8.427891, 49.010084]
+    ]
+
+    var baseMarker = new ol.Feature({
+        geometry: new ol.geom.Point(ol.proj.transform(kaCenter, 'EPSG:4326',
+            'EPSG:3857'))
+    });
+
+    var baseSource = new ol.source.Vector({
+        features: [baseMarker]
+    });
+
+    var baseIconStyle = new ol.style.Style({
+        image: new ol.style.Icon( /** @type {olx.style.IconOptions} */ ({
+            anchor: [0.5, 1],
+            anchorXUnits: 'fraction',
+            anchorYUnits: 'fraction',
+            opacity: 0.75,
+            scale: 0.1,
+            src: host + 'icons/marker.png'
+        }))
+    });
+
+    var baseLayer = new ol.layer.Vector({
+        source: baseSource,
+        style: baseIconStyle
+    });
+
+    var stationMarker = new ol.Feature({
+        geometry: new ol.geom.Point(ol.proj.transform(stationPos, 'EPSG:4326',
+            'EPSG:3857'))
+    });
+
+    var stationSource = new ol.source.Vector({
+        features: [stationMarker]
+    });
+
+    var stationIconStyle = new ol.style.Style({
+        image: new ol.style.Icon( /** @type {olx.style.IconOptions} */ ({
+            anchor: [0.5, 1],
+            anchorXUnits: 'fraction',
+            anchorYUnits: 'fraction',
+            opacity: 0.75,
+            scale: 0.05,
+            color: "black",
+            src: host + 'icons/package.png'
+        }))
+    });
+
+    var stationLayer = new ol.layer.Vector({
+        source: stationSource,
+        style: stationIconStyle
+    });
+
+
+    var droneMarker = new ol.Feature({
+        geometry: new ol.geom.Point(ol.proj.transform(stationPos, 'EPSG:4326',
+            'EPSG:3857'))
+    });
+
+    var droneSource = new ol.source.Vector({
+        features: [droneMarker]
+    });
+
+    var droneIconStyle = new ol.style.Style({
+        image: new ol.style.Icon( /** @type {olx.style.IconOptions} */ ({
+            anchor: [0.5, 0.75],
+            anchorXUnits: 'fraction',
+            anchorYUnits: 'fraction',
+            opacity: 1,
+            scale: 0.2,
+            src: host + 'icons/drone.png'
+        }))
+    });
+
+    var droneLayer = new ol.layer.Vector({
+        source: droneSource,
+        style: droneIconStyle
+    });
+
+    var userFeatures = []
+
+    for (var i = 0; i < userHouses.length; i++) {
+        var feature = new ol.Feature({
+            geometry: new ol.geom.Point(ol.proj.transform(userHouses[i], 'EPSG:4326',
+                'EPSG:3857'))
+        });
+        userFeatures.push(feature)
+    }
+
+    var userSource = new ol.source.Vector({
+        features: userFeatures
+    });
+
+    var userIconStyle = new ol.style.Style({
+        image: new ol.style.Icon( /** @type {olx.style.IconOptions} */ ({
+            anchor: [0.5, 1],
+            anchorXUnits: 'fraction',
+            anchorYUnits: 'fraction',
+            opacity: 0.75,
+            scale: 0.05,
+            src: host + 'icons/house.png'
+        }))
+    });
+
+    var userLayer = new ol.layer.Vector({
+        source: userSource,
+        style: userIconStyle
+    });
+
+
+
+    var map = new ol.Map({
+        layers: [
+            new ol.layer.Tile({
+                source: new ol.source.Stamen({
+                    layer: 'watercolor'
+                }),
+                opacity: 0.6
+            }),
+            new ol.layer.Tile({
+                source: new ol.source.Stamen({
+                    layer: 'terrain-labels'
+                })
+            }),
+            stationLayer,
+            baseLayer,
+            userLayer,
+            droneLayer
+        ],
+        target: 'map',
+        view: new ol.View({
+            center: ol.proj.transform(
+                kaCenter, 'EPSG:4326', 'EPSG:3857'),
+            zoom: 17
+        })
+    });
+
+    // setInterval(function() {
+    //     droneMarker.setGeometry(new ol.geom.Point(ol.proj.transform(kaCenter, 'EPSG:4326',
+    //         'EPSG:3857')))
+    // }, 2000)
+
+
+    // 6s = 60m
+    var speedDelta = 10;
+
+    var intervalDelta = 6;
+    var intervalBase = 6000 / intervalDelta;
+    var tickInterval = null
+
+    var timeStart = 61458598080000 //lowest
+
+    var timeEnd = 61459155960000 //highest
+
+    var timeDelta = (timeEnd - timeStart) / intervalBase * 10 * speedDelta
+    var maxTicks = (timeEnd - timeStart) / timeDelta;
+    var ticks = -1;
+
+    $(".startbtn").click(function(evt) {
+        ticks = -1;
+        nextTick()
+        tickInterval = setInterval(function() {
+            nextTick()
+        }, intervalBase)
+    })
+
+    $(".stopbtn").click(function(evt) {
+        clearTick()
+    })
+
+    function clearTick() {
+        if (tickInterval !== null) {
+            clearInterval(tickInterval)
+            tickInterval = null
+            clearMove()
+        }
+    }
+
+    function clearMove() {
+        if (moveInterval !== null) {
+            clearInterval(moveInterval)
+            moveInterval = null
+            droneMarker.setGeometry(new ol.geom.Point(ol.proj.transform(stationPos, 'EPSG:4326',
+                'EPSG:3857')))
+        }
+    }
+
+    function nextTick() {
+        if (ticks > maxTicks) {
+            clearTick();
+            return
+        }
+        console.log("tick " + ticks)
+        ticks++;
+
+        var nextInterval = {
+            intervalStart: timeStart + (ticks * timeDelta),
+            intervalEnd: timeStart + ((ticks + 1) * timeDelta)
+        }
+
+        $.ajax({
+            type: "POST",
+            url: host + "getOrdersForTimeRange",
+            data: nextInterval,
+            success: function(data) {
+                clearMove()
+                var queue = []
+                console.log(data)
+
+                for (var i = 0; i < data.length; i++) {
+                    queue.push({
+                        toCoordinate: [data[i].lat, data[i].lon]
+                    })
+                }
+                moveDroneForQueue(queue)
+            },
+            dataType: "json"
+        });
+    }
+
+
+    var moveInterval;
+
+    function moveDroneForQueue(queue) {
+        var i = 0;
+        console.log(queue)
+        moveInterval = setInterval(function() {
+            console.log("interval " + i)
+            if (i === queue.length) {
+                clearInterval(moveInterval)
+                moveInterval = null
+                return
+            }
+            droneMove(queue[i++].toCoordinate)
+        }, 1500 / intervalDelta)
+    }
+
+    function droneMove(toCoordinate) {
+        console.log("droneMove " + toCoordinate)
+
+        droneMarker.setGeometry(new ol.geom.Point(ol.proj.transform(toCoordinate, 'EPSG:4326',
+            'EPSG:3857')))
+        setTimeout(function() {
+            droneMarker.setGeometry(new ol.geom.Point(ol.proj.transform(stationPos, 'EPSG:4326',
+                'EPSG:3857')))
+        }, 1000 / intervalDelta)
+    }
+
+    $(".createuser").click(function() {
+        $.ajax({
+            type: "POST",
+            url: host + "addNewUser",
+            data: {
+                name: "name",
+                surname: "surname",
+                lat: 8.425698,
+                lon: 49.011576
+            },
+            success: function(data) {
+            },
+            dataType: "json"
+        });
+
+    })
+
+
+    $(".resetuser").click(function() {
+        $.ajax({
+            type: "POST",
+            url: host + "deleteUser",
+            data: {
+                userID: 14
+            },
+            success: function(data) {
+            },
+            dataType: "json"
+        });
+    })
+
+
+
+
+    $(".package").click(function() {
+        $.ajax({
+            type: "POST",
+            url: host + "addPackage",
+            data: {
+                userID: 14
+            },
+            success: function(data) {
+            },
+            dataType: "json"
+        });
+    })
+    </script>
+</body>
+
+</html>

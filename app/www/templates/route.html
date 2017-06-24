@@ -1,0 +1,50 @@
+<ion-view view-title="Paketzustellung">
+    <ion-content>
+    <div class="card">
+      <div class="item item-text-wrap">
+        Es sieht so aus als würden <strong>1</strong> Pakete für sie zur Lieferung bereitstehen, bitte geben Sie ein gewünschtes Zeitfenster zur Zustellung an.
+      </div>
+    </div>
+        <div class="list list-inset">
+            <label class="item item-input">
+                <span class="input-label">Frühester Zeitpunkt</span>
+                <input type="time" ng-model="date.startTime">
+            </label>
+            <label class="item item-input">
+                <span class="input-label">Spätester Zeitpunkt</span>
+                <input type="time" ng-model="date.endTime">
+            </label>
+            <div class="padding" ng-click="addNewOrder()">
+                <button class="button button-block button-positive">Bestätigen</button>
+            </div>
+        </div>
+        <!-- <div class="card" ng-repeat="route in routes">
+            <div class="item item-divider" ng-click="toggleVisibility(route)" style="background-color: #33cd5f; border-color: #28a54c; color: white">
+               <strong> {{route.departure}} – {{route.arrival}}</strong> <span style="color:#FD5A70" ng-hide="route.origInTime">   zu spät</span>  <span style="color: #848484; float: right">{{route.duration}}</span>
+            </div>
+            <div class="item item-text-wrap" ng-show="route.inTime"  style="background-color: rgba(55, 185, 23, 0.4)">
+                <div class="card" ng-repeat="fahrt in route.fahrtliste">
+                    <div class="item item-text-wrap" style="background-color: #ffc900">
+                        <strong>{{fahrt.bahn}}</strong>
+          <p>{{fahrt.startStation}} <span style="float: right">{{fahrt.startTime}}</span></p>
+          <p>{{fahrt.endStation}} <span style="float: right">{{fahrt.endTime}}</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+          <div class="item item-divider" style="background-color: #387ef5; border-color: #0c60ee; color: #eee">
+    {{firstEvent.startHours}}:{{firstEvent.startMinutes}}
+          </div>
+          <div class="item item-text-wrap" style="background-color: rgba(38, 112, 255, 0.3)">
+      <p style="font-size: 16px; font-weight: bold">{{firstEvent.summary}}</p>
+      <br>
+      <p style="font-size: 16px">{{firstEvent.location}}</p>
+          </div>
+          <div class="item item-divider" style="background-color: #387ef5; border-color: #0c60ee; color: #eee">
+    {{firstEvent.endHours}}:{{firstEvent.endMinutes}}
+          </div>
+        </div> -->
+    </ion-content>
+</ion-view>
